@@ -2,48 +2,43 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>WebAR Quiz Product</title>
+<title>WebAR Quiz</title>
 
 <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
 <style>
-body { margin: 0; overflow: hidden; }
-
-#name-ui {
-  position: fixed;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #111;
-  padding: 20px;
-  display: none;
-  z-index: 10;
+body { margin:0; overflow:hidden; }
+#name-ui{
+  position:fixed;
+  top:40%; left:50%;
+  transform:translate(-50%,-50%);
+  background:#111; padding:20px;
+  display:none; z-index:10;
 }
-#name-ui input, #name-ui button {
-  width: 200px;
-  margin: 6px 0;
-}
+#name-ui input,button{ width:200px; margin:6px 0; }
 </style>
 </head>
 
 <body>
 
-<!-- ===== UI NHẬP TÊN ===== -->
+<!-- UI NHẬP TÊN -->
 <div id="name-ui">
-  <input id="player-name" placeholder="Nhập tên của bạn">
+  <input id="player-name" placeholder="Nhập tên">
   <button id="btn-start">BẮT ĐẦU</button>
 </div>
 
 <a-scene
-  mindar-image="imageTargetSrc: targets.mind;
-                filterMinCF: 0.0001;
-                filterBeta: 0.01;"
+  mindar-image="
+    imageTargetSrc: targets.mind;
+    filterMinCF: 0.0005;
+    filterBeta: 0.02;"
   vr-mode-ui="enabled:false"
   device-orientation-permission-ui="enabled:false">
 
-  <!-- ===== ASSETS – BẠN ĐỔI FILE Ở ĐÂY ===== -->
+  <!-- ASSETS -->
   <a-assets>
+    <!-- 🔧 ĐỔI FILE Ở ĐÂY -->
     <a-asset-item id="logo" src="asset/logo.glb"></a-asset-item>
     <a-asset-item id="product" src="asset/product.glb"></a-asset-item>
     <a-asset-item id="creature" src="asset/creature.glb"></a-asset-item>
@@ -55,69 +50,63 @@ body { margin: 0; overflow: hidden; }
     <a-cursor rayOrigin="mouse"></a-cursor>
   </a-camera>
 
+  <!-- IMAGE TARGET -->
   <a-entity mindar-image-target="targetIndex:0">
 
-    <!-- ===== SCENE WELCOME ===== -->
-    <a-entity id="scene-welcome" visible="true">
-      <a-gltf-model src="#logo" position="0 0 -2"></a-gltf-model>
+    <!-- ANCHOR CHỐNG RUNG -->
+    <a-entity id="anchor">
 
-      <a-plane class="btn-join" position="0 -0.6 -1.5" width="1" height="0.3">
-        <a-text value="" align="center"></a-text>
-      </a-plane>
+      <!-- SCENE WELCOME -->
+      <a-entity id="scene-welcome" visible="true">
+        <a-gltf-model src="#logo" scale="0.4 0.4 0.4"></a-gltf-model>
 
-      <a-plane class="btn-product" position="0 -1 -1.5" width="1" height="0.3">
-        <a-text value="" align="center"></a-text>
-      </a-plane>
+        <a-plane class="btn-join" position="0 -0.6 0" width="1" height="0.3">
+          <a-text value="THAM GIA" align="center"></a-text>
+        </a-plane>
 
-      <a-plane class="btn-leaderboard" position="0 -1.4 -1.5" width="1" height="0.3">
-        <a-text value="" align="center"></a-text>
-      </a-plane>
+        <a-plane class="btn-product" position="0 -1 0" width="1" height="0.3">
+          <a-text value="TRANG SẢN PHẨM" align="center"></a-text>
+        </a-plane>
+
+        <a-plane class="btn-leaderboard" position="0 -1.4 0" width="1" height="0.3">
+          <a-text value="BẢNG XẾP HẠNG" align="center"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- SCENE QUIZ -->
+      <a-entity id="scene-quiz" visible="false">
+        <a-plane width="1.6" height="0.4" position="0 0.6 0">
+          <a-text id="question-text" align="center"></a-text>
+        </a-plane>
+
+        <a-plane class="answer" position="0 0 0.2" width="1" height="0.25">
+          <a-text class="answer-text" align="center"></a-text>
+        </a-plane>
+        <a-plane class="answer" position="0 -0.4 0.2" width="1" height="0.25">
+          <a-text class="answer-text" align="center"></a-text>
+        </a-plane>
+        <a-plane class="answer" position="0 -0.8 0.2" width="1" height="0.25">
+          <a-text class="answer-text" align="center"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- SCENE PRODUCT -->
+      <a-entity id="scene-product" visible="false">
+        <a-gltf-model src="#product" position="-0.5 0 0" scale="0.4 0.4 0.4"></a-gltf-model>
+        <a-gltf-model src="#creature" position="0.5 0 0" scale="0.4 0.4 0.4"></a-gltf-model>
+
+        <a-plane id="btn-reward" visible="false" position="0 -0.8 0" width="1" height="0.3">
+          <a-text value="NHẬN QUÀ" align="center"></a-text>
+        </a-plane>
+      </a-entity>
+
+      <!-- SCENE REWARD -->
+      <a-entity id="scene-reward" visible="false">
+        <a-gltf-model src="#gift" scale="0.4 0.4 0.4"></a-gltf-model>
+        <a-sound src="#winSound" autoplay="true"></a-sound>
+      </a-entity>
+
     </a-entity>
-
-    <!-- ===== SCENE QUIZ ===== -->
-    <a-entity id="scene-quiz" visible="false">
-      <a-plane width="1.6" height="0.4" position="0 0.6 -2">
-        <a-text id="question-text" wrap-count="30" align="center"></a-text>
-      </a-plane>
-
-      <a-plane class="answer" position="0 0 -1.6" width="1" height="0.25">
-        <a-text class="answer-text" align="center"></a-text>
-      </a-plane>
-
-      <a-plane class="answer" position="0 -0.4 -1.6" width="1" height="0.25">
-        <a-text class="answer-text" align="center"></a-text>
-      </a-plane>
-
-      <a-plane class="answer" position="0 -0.8 -1.6" width="1" height="0.25">
-        <a-text class="answer-text" align="center"></a-text>
-      </a-plane>
-    </a-entity>
-
-    <!-- ===== SCENE PRODUCT ===== -->
-    <a-entity id="scene-product" visible="false">
-      <a-gltf-model src="#product" position="-0.5 0 -2"></a-gltf-model>
-      <a-gltf-model src="#creature" position="0.5 0 -2"></a-gltf-model>
-
-      <a-plane id="btn-reward" visible="false"
-        position="0 -0.8 -1.5" width="1" height="0.3">
-        <a-text value="NHẬN QUÀ" align="center"></a-text>
-      </a-plane>
-    </a-entity>
-
-    <!-- ===== SCENE REWARD ===== -->
-    <a-entity id="scene-reward" visible="false">
-      <a-gltf-model src="#gift" position="0 0 -2"></a-gltf-model>
-      <a-sound src="#winSound" autoplay="true"></a-sound>
-    </a-entity>
-
-    <!-- ===== SCENE LEADERBOARD ===== -->
-    <a-entity id="scene-leaderboard" visible="false">
-      <a-plane width="1.6" height="1" position="0 0 -2">
-        <a-text value="BẢNG XẾP HẠNG" align="center" position="0 0.4 0.01"></a-text>
-      </a-plane>
-      <a-entity id="leaderboard-list" position="0 0.2 -1.9"></a-entity>
-    </a-entity>
-
   </a-entity>
 </a-scene>
 
