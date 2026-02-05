@@ -164,6 +164,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let playerName = "";
   let currentQuestion = 0;
+  const sceneEl = document.querySelector('a-scene');
+  const mindarSystem = sceneEl.systems['mindar-image-system'];
+  const targetEl = document.querySelector('[mindar-image-target]');
+
+  targetEl.addEventListener('targetFound', () => {
+  console.log('🎯 Đã nhận diện xong – dừng quét');
+  mindarSystem.stop(); // ❗ QUAN TRỌNG
+});
+
 
   const quizData = [
     {
