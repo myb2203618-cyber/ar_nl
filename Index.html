@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>WebAR Quiz Product</title>
+
+  <!-- ===== A-FRAME ===== -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- ===== MINDAR ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <!-- ===== CSS UI HTML (NHẬP TÊN) ===== -->
+  <style>
+    body { margin: 0; overflow: hidden; }
+
+    /* UI nhập tên – bạn có thể chỉnh style */
+    #name-ui {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      padding: 20px;
+      display: none;
+      z-index: 10;
+    }
+    #name-ui input, #name-ui button {
+      width: 200px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ================= UI NHẬP TÊN (HTML) ================= -->
+<!-- 👉 BẠN CÓ THỂ ĐỔI THÀNH UI 3D SAU -->
+<div id="name-ui">
+  <input id="player-name" placeholder="Nhập tên của bạn">
+  <button id="btn-start">BẮT ĐẦU</button>
+</div>
+
+<!-- ================= AR SCENE ================= -->
+<a-scene
+  mindar-image="imageTargetSrc: targets.mind;"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false">
+
+  <!-- ================= ASSETS ================= -->
+  <!-- 👉 BẠN CHỈ CẦN ĐỔI FILE GLB / MP3 Ở ĐÂY -->
+  <a-assets>
+    <audio id="bgm" src="audio/intro.mp3"></audio>
+    <audio id="winSound" src="audio/win.mp3"></audio>
+
+    <a-asset-item id="logo" src="asset/logo.glb"></a-asset-item>
+    <a-asset-item id="product" src="asset/sp.glb"></a-asset-item>
+    <a-asset-item id="creature" src="asset/sinhvat.glb"></a-asset-item>
+    <a-asset-item id="gift" src="asset/gift.glb"></a-asset-item>
+  </a-assets>
+
+  <!-- CAMERA -->
+  <a-camera look-controls="enabled:false">
+    <a-cursor></a-cursor>
+  </a-camera>
+
+  <!-- ================= IMAGE TARGET ================= -->
+  <a-entity mindar-image-target="targetIndex: 0">
+
+    <!-- ========== SCENE 1: CHÀO MỪNG ========== -->
+    <a-entity id="scene-welcome" visible="true">
+
+      <!-- LOGO (BẠN ĐỔI MODEL + ANIMATION) -->
+      <a-gltf-model
+        src="#logo"
+        position="0 0 -2"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
+      </a-gltf-model>
+
+      <!-- NÚT THAM GIA -->
+      <a-plane class="btn-join" position="0 -0.6 -1.5"
+        width="1" height="0.3" color="#fff">
+        <a-text value="THAM GIA" align="center" position="0 0 0.01"></a-text>
+      </a-plane>
+
+      <!-- NÚT TRANG SẢN PHẨM -->
+      <a-plane class="btn-product" position="0 -1 -1.5"
+        width="1" height="0.3" color="#ccc">
+        <a-text value="TRANG SẢN PHẨM" align="center" position="0 0 0.01"></a-text>
+      </a-plane>
+
+      <!-- NÚT BẢNG XẾP HẠNG -->
+      <a-plane class="btn-leaderboard" position="0 -1.4 -1.5"
+        width="1" height="0.3" color="#aaa">
+        <a-text value="BẢNG XẾP HẠNG" align="center" position="0 0 0.01"></a-text>
+      </a-plane>
+    </a-entity>
+
+    <!-- ========== SCENE 2: QUIZ ========== -->
+    <a-entity id="scene-quiz" visible="false">
+      <a-plane width="1.6" height="0.4" position="0 0.6 -2" color="#222">
+        <a-text id="question-text" wrap-count="30" align="center"></a-text>
+      </a-plane>
+
+      <!-- 3 ĐÁP ÁN -->
+      <a-plane class="answer" data-index="0" position="0 0 -1.6" width="1" height="0.25"></a-plane>
+      <a-plane class="answer" data-index="1" position="0 -0.4 -1.6" width="1" height="0.25"></a-plane>
+      <a-plane class="answer" data-index="2" position="0 -0.8 -1.6" width="1" height="0.25"></a-plane>
+    </a-entity>
+
+    <!-- ========== SCENE 3: SẢN PHẨM + SINH VẬT ========== -->
+    <a-entity id="scene-product" visible="false">
+
+      <!-- MODEL SẢN PHẨM -->
+      <a-gltf-model src="#product" position="-0.5 0 -2"></a-gltf-model>
+
+      <!-- MODEL SINH VẬT (CÓ ANIMATION TRONG GLB) -->
+      <a-gltf-model id="creature-model" src="#creature" position="0.5 0 -2"></a-gltf-model>
+
+      <!-- NÚT NHẬN QUÀ -->
+      <a-plane id="btn-reward" visible="false"
+        position="0 -0.8 -1.5" width="1" height="0.3" color="#fff">
+        <a-text value="NHẬN QUÀ" align="center"></a-text>
+      </a-plane>
+    </a-entity>
+
+    <!-- ========== SCENE 4: PHẦN THƯỞNG ========== -->
+    <a-entity id="scene-reward" visible="false">
+      <a-gltf-model src="#gift" position="0 0 -2"></a-gltf-model>
+      <a-sound src="#winSound" autoplay="true"></a-sound>
+    </a-entity>
+
+    <!-- ========== SCENE 5: BẢNG XẾP HẠNG ========== -->
+    <a-entity id="scene-leaderboard" visible="false">
+      <a-plane width="1.6" height="1" color="#111" position="0 0 -2">
+        <a-text value="BẢNG XẾP HẠNG" align="center"
+          position="0 0.4 0.01"></a-text>
+      </a-plane>
+
+      <!-- 👉 JS sẽ render danh sách vào đây -->
+      <a-entity id="leaderboard-list" position="0 0.2 -1.9"></a-entity>
+    </a-entity>
+
+  </a-entity>
+</a-scene>
+
+<!-- ===== FILE JS RIÊNG ===== -->
+<script type="module" src="ar_index.js"></script>
+
+</body>
+</html>
