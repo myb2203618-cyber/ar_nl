@@ -1,12 +1,10 @@
-
-/* ================= FIREBASE ================= */
-/* 👉 DÁN CONFIG FIREBASE CỦA BẠN VÀO ĐÂY */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc,
   query, orderBy, limit, getDocs
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+/* ===== FIREBASE CONFIG ===== */
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -16,8 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ================= QUIZ DATA ================= */
-/* 👉 BẠN SỬA NỘI DUNG CÂU HỎI Ở ĐÂY */
+/* ===== QUIZ DATA ===== */
 const questions = [
   { q: "Câu hỏi 1?", a: ["A", "B", "C"], correct: 0 },
   { q: "Câu hỏi 2?", a: ["A", "B", "C"], correct: 1 },
@@ -26,92 +23,89 @@ const questions = [
   { q: "Câu hỏi 5?", a: ["A", "B", "C"], correct: 1 }
 ];
 
-/* ================= STATE ================= */
+/* ===== STATE ===== */
 let playerName = "";
 let quizIndex = 0;
 let quizList = [];
 let startTime = 0;
 
-/* ================= SCENE CONTROL ================= */
+/* ===== SCENE CONTROL ===== */
 function showScene(id) {
-  document.querySelectorAll('[id^="scene-"]').forEach(s =>
-    s.setAttribute("visible", false)
-  );
+  document.querySelectorAll('[id^="scene-"]').forEach(s => {
+    s.setAttribute("visible", false);
+  });
   document.querySelector(id).setAttribute("visible", true);
 }
 
-/* ================= MENU ================= */
-document.querySelector(".btn-join").onclick = () => {
-  document.getElementById("name-ui").style.display = "block";
-};
+/* ===== INIT ===== */
+window.addEventListener("DOMContentLoaded", () => {
 
-document.querySelector(".btn-product").onclick = () => {
-  /* 👉 LINK TRANG SẢN PHẨM */
-  window.open("https://your-product-site.com", "_blank");
-};
+  document.querySelector(".btn-join").addEventListener("click", () => {
+    document.getElementById("name-ui").style.display = "block";
+  });
 
-document.querySelector(".btn-leaderboard").onclick = () => {
-  showScene("#scene-leaderboard");
-  loadLeaderboard();
-};
+  document.querySelector(".btn-product").addEventListener("click", () => {
+    window.open("https://your-product-site.com", "_blank");
+  });
 
-/* ================= START QUIZ ================= */
-document.getElementById("btn-start").onclick = () => {
+  document.querySelector(".btn-leaderboard").addEventListener("click", () => {
+    showScene("#scene-leaderboard");
+    loadLeaderboard();
+  });
+
+  document.getElementById("btn-start").addEventListener("click", startQuiz);
+
+  document.getElementById("btn-reward").addEventListener("click", () => {
+    showScene("#scene-reward");
+  });
+
+});
+
+/* ===== QUIZ ===== */
+function startQuiz() {
   playerName = document.getElementById("player-name").value;
   document.getElementById("name-ui").style.display = "none";
 
-  quizList = [...questions].sort(() => 0.5 - Math.random());
+  quizList = [...questions].sort(() => Math.random() - 0.5);
   quizIndex = 0;
   startTime = Date.now();
 
   showScene("#scene-quiz");
   loadQuestion();
-};
+}
 
-/* ================= QUIZ LOGIC ================= */
 function loadQuestion() {
   const q = quizList[quizIndex];
-  document.getElementById("question-text")
-    .setAttribute("value", q.q);
+  document.getElementById("question-text").setAttribute("value", q.q);
 
   document.querySelectorAll(".answer").forEach((btn, i) => {
-    btn.innerHTML =
-      `<a-text value="${q.a[i]}" align="center"></a-text>`;
+    btn.querySelector(".answer-text").setAttribute("value", q.a[i]);
     btn.onclick = () => selectAnswer(i);
   });
 }
 
-function selectAnswer(i) {
+function selectAnswer() {
   quizIndex++;
-  if (quizIndex < 5) loadQuestion();
-  else finishQuiz();
+  quizIndex < 5 ? loadQuestion() : finishQuiz();
 }
 
-/* ================= FINISH QUIZ ================= */
+/* ===== FINISH ===== */
 async function finishQuiz() {
   const time = (Date.now() - startTime) / 1000;
 
-  /* 👉 LƯU TÊN + THỜI GIAN VÀO FIREBASE */
   await addDoc(collection(db, "leaderboard"), {
     name: playerName,
-    time: time
+    time
   });
 
   showScene("#scene-product");
 
-  /* 👉 ĐỢI ANIMATION XONG RỒI HIỆN NÚT NHẬN QUÀ */
   setTimeout(() => {
-    document.getElementById("btn-reward")
-      .setAttribute("visible", true);
+    document.getElementById("btn-reward").setAttribute("visible", true);
   }, 3000);
 }
 
-/* ================= REWARD ================= */
-document.getElementById("btn-reward").onclick = () => {
-  showScene("#scene-reward");
-};
-
-/* ================= LEADERBOARD ================= */
+/* ===== LEADERBOARD ===== */
 async function loadLeaderboard() {
   const q = query(
     collection(db, "leaderboard"),
@@ -128,10 +122,8 @@ async function loadLeaderboard() {
 
   snap.forEach(d => {
     const t = document.createElement("a-text");
-    t.setAttribute(
-      "value",
-      `${rank}. ${d.data().name} - ${d.data().time.toFixed(2)}s`
-    );
+    t.setAttribute("value",
+      `${rank}. ${d.data().name} - ${d.data().time.toFixed(2)}s`);
     t.setAttribute("align", "center");
     t.setAttribute("position", `0 ${y} 0`);
     list.appendChild(t);
