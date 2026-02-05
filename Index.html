@@ -36,7 +36,9 @@ body { margin: 0; overflow: hidden; }
 </div>
 
 <a-scene
-  mindar-image="imageTargetSrc: targets.mind;"
+  mindar-image="imageTargetSrc: targets.mind;
+                filterMinCF: 0.0001;
+                filterBeta: 0.01;"
   vr-mode-ui="enabled:false"
   device-orientation-permission-ui="enabled:false">
 
@@ -60,15 +62,15 @@ body { margin: 0; overflow: hidden; }
       <a-gltf-model src="#logo" position="0 0 -2"></a-gltf-model>
 
       <a-plane class="btn-join" position="0 -0.6 -1.5" width="1" height="0.3">
-        <a-text value="THAM GIA" align="center"></a-text>
+        <a-text value="" align="center"></a-text>
       </a-plane>
 
       <a-plane class="btn-product" position="0 -1 -1.5" width="1" height="0.3">
-        <a-text value="TRANG SẢN PHẨM" align="center"></a-text>
+        <a-text value="" align="center"></a-text>
       </a-plane>
 
       <a-plane class="btn-leaderboard" position="0 -1.4 -1.5" width="1" height="0.3">
-        <a-text value="BẢNG XẾP HẠNG" align="center"></a-text>
+        <a-text value="" align="center"></a-text>
       </a-plane>
     </a-entity>
 
