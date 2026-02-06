@@ -1,59 +1,42 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>MindAR + A-Frame</title>
-
-  <!-- A-FRAME -->
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-
-  <!-- MINDAR -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <title>Document</title>
 </head>
 
 <body>
-  <a-scene
-    mindar-image="imageTargetSrc: targets.mind; autoStart: true;"
-    color-space="sRGB"
-    renderer="physicallyCorrectLights"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: targets.mind" vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
 
-    <!-- CAMERA -->
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-assets>
+            <a-asset-item id="logo" src="asset/logo.glb"></a-asset-item>
+            <a-asset-item id="node" src="asset/nut.glb"></a-asset-item>
+        </a-assets>
 
-    <!-- TRACKED IMAGE -->
-    <a-entity mindar-image-target="targetIndex: 0">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- LOGO BÊN TRÁI -->
-      <a-gltf-model
-        src="asset/logo.glb"
-        position="1 0 0"
-        >
-      </a-gltf-model>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-gltf-model src="#logo" position="0 0 0" scale="0.1 0.1 0.1" rotation="0 0 0"></a-gltf-model>
+            <!-- NODE 1 -->
+            <a-gltf-model src="#node" position="0.4 0.25 0" scale="0.2 0.2 0.2">
+            </a-gltf-model>
 
-      <!-- NODE 1 -->
-      <a-gltf-model
-        src="asset/nut.glb"
-        position="0.4 0.25 0"
-        scale="0.2 0.2 0.2">
-      </a-gltf-model>
+            <!-- NODE 2 -->
+            <a-gltf-model src="#node" position="0.6 0 0" scale="0.2 0.2 0.2">
+            </a-gltf-model>
 
-      <!-- NODE 2 -->
-      <a-gltf-model
-        src="asset/nut.glb"
-        position="0.6 0 0"
-        scale="0.2 0.2 0.2">
-      </a-gltf-model>
+            <!-- NODE 3 -->
+            <a-gltf-model src="#node" position="0.4 -0.25 0" scale="0.2 0.2 0.2">
+            </a-gltf-model>
+        </a-entity>
 
-      <!-- NODE 3 -->
-      <a-gltf-model
-        src="asset/nut.glb"
-        position="0.4 -0.25 0"
-        scale="0.2 0.2 0.2">
-      </a-gltf-model>
 
-    </a-entity>
-  </a-scene>
+    </a-scene>
 </body>
+
 </html>
