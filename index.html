@@ -6,7 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <script src="ap.js"></script>
+    <script>
+        AFRAME.registerComponent("click-switch", {
+            schema: {
+                target: { type: "string" }
+            },
+            init: function () {
+                this.el.addEventListener("click", () => {
+                    document.querySelector("#group-main")
+                        .setAttribute("visible", "false");
+
+                    document.querySelector(this.data.target)
+                        .setAttribute("visible", "true");
+                });
+            }
+        });
+    </script>
     <title>Document</title>
 </head>
 
@@ -20,17 +35,16 @@
             <a-asset-item id="ans" src="asset/cautraloi.glb"></a-asset-item>
         </a-assets>
 
-        <a-camera look-controls="enabled: false"
-          cursor="rayOrigin: mouse"
-          raycaster="objects: .clickable">
-</a-camera>
+        <a-camera look-controls="enabled: false" cursor="rayOrigin: mouse" raycaster="objects: .clickable">
+        </a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
             <!-- GROUP start -->
             <a-entity id="group-main" visible="true">
                 <a-gltf-model src="#logo" position="0 0 0" scale="0.1 0.1 0.1" rotation="0 0 0"></a-gltf-model>
                 <!-- NODE 1 -->
-                <a-gltf-model src="#node" position="0.4 0.25 0" scale="0.2 0.2 0.2" class="clickable" click-switch="target: #group-quiz">
+                <a-gltf-model src="#node" position="0.4 0.25 0" scale="0.2 0.2 0.2" class="clickable"
+                    click-switch="target: #group-quiz">
                 </a-gltf-model>
 
                 <!-- NODE 2 -->
