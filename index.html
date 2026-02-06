@@ -1,85 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <script>
-        AFRAME.registerComponent("click-switch", {
-            schema: {
-                target: { type: "string" }
-            },
-            init: function () {
-                this.el.addEventListener("mousedown", () => {
-                    console.log("NODE PRESSED");
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Three.js + AR.js NFT</title>
 
-                    document.querySelector("#group-main")
-                        .setAttribute("visible", "false");
+  <!-- THREE -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
 
-                    document.querySelector(this.data.target)
-                        .setAttribute("visible", "true");
-                });
-            }
-        });
-    </script>
+  <!-- AR.JS NFT -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar-nft.js"></script>
 
-    <title>Document</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
 </head>
 
 <body>
-    <a-scene mindar-image="imageTargetSrc: targets.mind" vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
+<script>
+let scene, camera, renderer;
+let arToolkitSource, arToolkitContext;
+let markerRoot;
 
-        <a-assets>
-            <a-asset-item id="logo" src="asset/logo.glb"></a-asset-item>
-            <a-asset-item id="node" src="asset/nut.glb"></a-asset-item>
-            <a-asset-item id="ans" src="asset/cautraloi.glb"></a-asset-item>
-        </a-assets>
+let groupMain = new THREE.Group();
+let groupQuiz = new THREE.Group();
 
-        <a-camera look-controls="enabled: false" cursor="rayOrigin: mouse" raycaster="objects: .clickable">
-        </a-camera>
+let raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+let clickable = [];
 
-        <a-entity mindar-image-target="targetIndex: 0">
-            <!-- GROUP start -->
-            <a-entity id="group-main" visible="true">
-                <a-gltf-model src="#logo" position="0 0 0" scale="0.1 0.1 0.1" rotation="0 0 0"></a-gltf-model>
-                <!-- NODE 1 -->
-                <a-gltf-model src="#node" position="0.4 0.25 0" scale="0.2 0.2 0.2" class="clickable"
-                    click-switch="target: #group-quiz">
-                </a-gltf-model>
+init();
+animate();
 
-                <!-- NODE 2 -->
-                <a-gltf-model src="#node" position="0.6 0 0" scale="0.2 0.2 0.2">
-                </a-gltf-model>
+function init() {
+  scene = new THREE.Scene();
 
-                <!-- NODE 3 -->
-                <a-gltf-model src="#node" position="0.4 -0.25 0" scale="0.2 0.2 0.2">
-                </a-gltf-model>
-            </a-entity>
-            <!-- GROUP quiz -->
-            <a-entity id="group-quiz" visible="false">
-                <a-box color="red" scale="0.3 0.3 0.3"></a-box>
-                <!-- MODEL TRÊN -->
-                <a-gltf-model src="#logo" position="0 0.35 0" scale="0.12 0.12 0.12">
-                </a-gltf-model>
+  camera = new THREE.Camera();
+  scene.add(camera);
 
-                <!-- HÀNG DƯỚI -->
-                <a-gltf-model src="#ans" position="-0.35 -0.2 0" scale="0.2 0.2 0.2">
-                </a-gltf-model>
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  document.body.appendChild(renderer.domElement);
 
-                <a-gltf-model src="#ans" position="0 -0.2 0" scale="0.2 0.2 0.2">
-                </a-gltf-model>
+  // AR source
+  arToolkitSource = new THREEx.ArToolkitSource({
+    sourceType: "webcam"
+  });
 
-                <a-gltf-model src="#ans" position="0.35 -0.2 0" scale="0.2 0.2 0.2">
-                </a-gltf-model>
-            </a-entity>
+  arToolkitSource.init(() => onResize());
+  window.addEventListener("resize", onResize);
 
-        </a-entity>
+  // AR context
+  arToolkitContext = new THREEx.ArToolkitContext({
+    cameraParametersUrl:
+      "https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/data/data/camera_para.dat",
+    detectionMode: "mono",
+  });
 
+  arToolkitContext.init(() => {
+    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+  });
 
-    </a-scene>
+  // NFT marker
+  markerRoot = new THREE.Group();
+  scene.add(markerRoot);
+
+  new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+    type: "nft",
+    descriptorsUrl: "ntf/marker",
+  });
+
+  // Load models
+  const loader = new THREE.GLTFLoader();
+
+  // LOGO
+  loader.load("asset/logo.glb", gltf => {
+    const logo = gltf.scene;
+    logo.scale.set(0.1, 0.1, 0.1);
+    groupMain.add(logo);
+  });
+
+  // NODE 1 (clickable)
+  loader.load("asset/nut.glb", gltf => {
+    const node = gltf.scene;
+    node.position.set(0.4, 0.25, 0);
+    node.scale.set(0.2, 0.2, 0.2);
+    node.userData.clickable = true;
+    clickable.push(node);
+    groupMain.add(node);
+  });
+
+  // QUIZ GROUP
+  groupQuiz.visible = false;
+
+  loader.load("asset/cautraloi.glb", gltf => {
+    const ans = gltf.scene;
+    ans.position.set(0, -0.2, 0);
+    ans.scale.set(0.2, 0.2, 0.2);
+    groupQuiz.add(ans);
+  });
+
+  markerRoot.add(groupMain);
+  markerRoot.add(groupQuiz);
+
+  // CLICK
+  window.addEventListener("click", onClick);
+}
+
+function onClick(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(clickable, true);
+
+  if (intersects.length > 0) {
+    console.log("NODE CLICKED");
+    groupMain.visible = false;
+    groupQuiz.visible = true;
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (arToolkitSource.ready)
+    arToolkitContext.update(arToolkitSource.domElement);
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  arToolkitSource.onResize();
+  arToolkitSource.copySizeTo(renderer.domElement);
+  if (arToolkitContext.arController !== null) {
+    arToolkitSource.copySizeTo(arToolkitContext.arController.canvas);
+  }
+}
+</script>
 </body>
-
 </html>
