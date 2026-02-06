@@ -12,7 +12,9 @@
                 target: { type: "string" }
             },
             init: function () {
-                this.el.addEventListener("click", () => {
+                this.el.addEventListener("mousedown", () => {
+                    console.log("NODE PRESSED");
+
                     document.querySelector("#group-main")
                         .setAttribute("visible", "false");
 
@@ -22,6 +24,7 @@
             }
         });
     </script>
+
     <title>Document</title>
 </head>
 
