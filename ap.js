@@ -4,8 +4,12 @@ AFRAME.registerComponent("click-switch", {
   },
   init: function () {
     this.el.addEventListener("click", () => {
-      document.querySelector("#group-main").setAttribute("visible", "false");
-      document.querySelector(this.data.target).setAttribute("visible", "true");
+      console.log("CLICK OK"); // 👈 test
+      document.querySelector("#group-main")
+        .setAttribute("visible", "false");
+
+      document.querySelector(this.data.target)
+        .setAttribute("visible", "true");
     });
   }
 });
