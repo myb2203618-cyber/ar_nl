@@ -39,7 +39,8 @@
   </a-assets>
 <!-- embedded
   arjs="sourceType: webcam; debugUIEnabled: false;" -->
-  <a-scene 
+  <a-scene
+  arjs="sourceType: webcam; debugUIEnabled: false;"
   cursor="rayOrigin: mouse"
   raycaster="objects: .clickable">
 
@@ -61,16 +62,16 @@
         </a-gltf-model>
 
         <!-- <a-giltf-model > </a-giltf-model> -->
-        <a-gltf-model src="#node" position="0.6 0.6 0" scale="0.2 0.2 0.2" class="clickable"
+        <a-gltf-model src="#nut" position="0.6 0.6 0" scale="0.2 0.2 0.2" class="clickable"
           scene-switch="target: #quiz" rotation="0 90 0">
         </a-gltf-model>
         <!-- NODE 2 -->
-        <a-gltf-model src="#node" position="0.6 0.3 0" scale="0.2 0.2 0.2" rotation="0 90 0"
+        <a-gltf-model src="#nut" position="0.6 0.3 0" scale="0.2 0.2 0.2" rotation="0 90 0"
           animation="">
         </a-gltf-model>
 
         <!-- NODE 3 -->
-        <a-gltf-model src="#node" position="0.6 0 0" scale="0.2 0.2 0.2" rotation="0 90 0"
+        <a-gltf-model src="#nut" position="0.6 0 0" scale="0.2 0.2 0.2" rotation="0 90 0"
           visible="">
         </a-gltf-model>
       </a-entity>
@@ -78,7 +79,7 @@
       <!-- ===== SCENE 2 ===== -->
       <a-entity id="quiz" visible="false">
 
-        <a-gltf-model src="#cautraloi" position="0 0 0" scale="0.5 0.5 0.5" class="clickable">
+        <a-gltf-model src="#ans" position="0 0 0" scale="0.5 0.5 0.5" class="clickable">
         </a-gltf-model>
 
       </a-entity>
