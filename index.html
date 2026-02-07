@@ -1,143 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Three.js + AR.js NFT</title>
+  <title>AR Marker Interaction Skeleton</title>
 
-  <!-- THREE -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 
-  <!-- AR.JS NFT -->
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar-nft.js"></script>
+  <!-- AR.js -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
-  <style>
-    body { margin: 0; overflow: hidden; }
-  </style>
+  <!-- LOGIC JS -->
+  <script>
+    // Click: Ẩn scene hiện tại → hiện scene tiếp theo
+    AFRAME.registerComponent('scene-switch', {
+      schema: {
+        target: { type: 'selector' }
+      },
+      init: function () {
+        this.el.addEventListener('click', () => {
+          this.el.parentElement.setAttribute('visible', false);
+          this.data.target.setAttribute('visible', true);
+        });
+      }
+    });
+  </script>
 </head>
 
-<body>
-<script>
-let scene, camera, renderer;
-let arToolkitSource, arToolkitContext;
-let markerRoot;
+<body style="margin:0; overflow:hidden;">
+  <a-asset>
+    <!-- <a-asset-item></a-asset-item> -->
+    <a-asset-item id="logo" src="asset/logo.glb"></a-asset-item>
+    <a-asset-item id="nut" src="asset/nut.glb"></a-asset-item>
+    <a-asset-item id="ans" src="asset/cautraloi.glb"></a-asset-item>
+  </a-asset>
 
-let groupMain = new THREE.Group();
-let groupQuiz = new THREE.Group();
+  <a-scene embedded arjs="sourceType: webcam;" cursor="rayOrigin: mouse" raycaster="objects: .clickable">
 
-let raycaster = new THREE.Raycaster();
-let mouse = new THREE.Vector2();
-let clickable = [];
+    <!-- ===== MARKER CỦA BẠN ===== -->
+    <a-marker type="pattern" url="marker.patt" smooth="true" smoothCount="10" smoothTolerance="0.01"
+      smoothThreshold="5">
 
-init();
-animate();
+      <!-- ===== SCENE 1 ===== -->
+      <a-entity id="scene1" visible="true">
 
-function init() {
-  scene = new THREE.Scene();
+        <a-gltf-model src="#logo" position="-1.04 0.3 0" scale="0.5 0.5 0.5" gltf-model="asset/logo.glb">
+          <!-- class="clickable"
+          scene-switch="target: #scene2"
+          animation="property: scale;
+                     from: 0 0 0;
+                     to: 0.5 0.5 0.5;
+                     dur: 1200;
+                     easing: easeOutElastic" -->
+        </a-gltf-model>
 
-  camera = new THREE.Camera();
-  scene.add(camera);
+        <!-- <a-giltf-model > </a-giltf-model> -->
+        <a-gltf-model src="#node" position="0.6 0.6 0" scale="0.2 0.2 0.2" class="clickable"
+          click-switch="target: #quiz" gltf-model="asset/nut.glb" rotation="0 90 0">
+        </a-gltf-model>
+        <!-- NODE 2 -->
+        <a-gltf-model position="0.6 0.3 0" scale="0.2 0.2 0.2" gltf-model="asset/nut.glb" rotation="0 90 0"
+          animation="">
+        </a-gltf-model>
 
-  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  document.body.appendChild(renderer.domElement);
+        <!-- NODE 3 -->
+        <a-gltf-model position="0.6 0 0" scale="0.2 0.2 0.2" gltf-model="asset/nut.glb" rotation="0 90 0"
+          visible="">
+        </a-gltf-model>
+      </a-entity>
 
-  // AR source
-  arToolkitSource = new THREEx.ArToolkitSource({
-    sourceType: "webcam"
-  });
+      <!-- ===== SCENE 2 ===== -->
+      <a-entity id="quiz" visible="false">
 
-  arToolkitSource.init(() => onResize());
-  window.addEventListener("resize", onResize);
+        <a-gltf-model src="#cautraloi" position="0 0 0" scale="0.5 0.5 0.5" class="clickable">
+        </a-gltf-model>
 
-  // AR context
-  arToolkitContext = new THREEx.ArToolkitContext({
-    cameraParametersUrl:
-      "https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/data/data/camera_para.dat",
-    detectionMode: "mono",
-  });
+      </a-entity>
 
-  arToolkitContext.init(() => {
-    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-  });
+    </a-marker>
 
-  // NFT marker
-  markerRoot = new THREE.Group();
-  scene.add(markerRoot);
+    <!-- CAMERA -->
+    <a-entity camera></a-entity>
 
-  new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-    type: "nft",
-    descriptorsUrl: "ntf/marker",
-  });
+  </a-scene>
 
-  // Load models
-  const loader = new THREE.GLTFLoader();
-
-  // LOGO
-  loader.load("asset/logo.glb", gltf => {
-    const logo = gltf.scene;
-    logo.scale.set(0.1, 0.1, 0.1);
-    groupMain.add(logo);
-  });
-
-  // NODE 1 (clickable)
-  loader.load("asset/nut.glb", gltf => {
-    const node = gltf.scene;
-    node.position.set(0.4, 0.25, 0);
-    node.scale.set(0.2, 0.2, 0.2);
-    node.userData.clickable = true;
-    clickable.push(node);
-    groupMain.add(node);
-  });
-
-  // QUIZ GROUP
-  groupQuiz.visible = false;
-
-  loader.load("asset/cautraloi.glb", gltf => {
-    const ans = gltf.scene;
-    ans.position.set(0, -0.2, 0);
-    ans.scale.set(0.2, 0.2, 0.2);
-    groupQuiz.add(ans);
-  });
-
-  markerRoot.add(groupMain);
-  markerRoot.add(groupQuiz);
-
-  // CLICK
-  window.addEventListener("click", onClick);
-}
-
-function onClick(event) {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(clickable, true);
-
-  if (intersects.length > 0) {
-    console.log("NODE CLICKED");
-    groupMain.visible = false;
-    groupQuiz.visible = true;
-  }
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  if (arToolkitSource.ready)
-    arToolkitContext.update(arToolkitSource.domElement);
-
-  renderer.render(scene, camera);
-}
-
-function onResize() {
-  arToolkitSource.onResize();
-  arToolkitSource.copySizeTo(renderer.domElement);
-  if (arToolkitContext.arController !== null) {
-    arToolkitSource.copySizeTo(arToolkitContext.arController.canvas);
-  }
-}
-</script>
 </body>
+
 </html>
